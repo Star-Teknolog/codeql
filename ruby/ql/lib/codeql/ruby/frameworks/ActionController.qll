@@ -46,7 +46,7 @@ class ActionControllerControllerClass extends ClassDeclaration {
  * A public instance method defined within an `ActionController` controller class.
  * This may be the target of a route handler, if such a route is defined.
  */
-class ActionControllerActionMethod extends Method, HTTP::Server::RequestHandler::Range {
+class ActionControllerActionMethod extends Method, Http::Server::RequestHandler::Range {
   private ActionControllerControllerClass controllerClass;
 
   ActionControllerActionMethod() { this = controllerClass.getAMethod() and not this.isPrivate() }
@@ -83,7 +83,7 @@ class ActionControllerActionMethod extends Method, HTTP::Server::RequestHandler:
    * Gets a route to this handler, if one exists.
    * May return multiple results.
    */
-  ActionDispatch::Route getARoute() {
+  ActionDispatch::Routing::Route getARoute() {
     exists(string name |
       isRoute(result, name, controllerClass) and
       isActionControllerMethod(this, name, controllerClass)
@@ -93,10 +93,10 @@ class ActionControllerActionMethod extends Method, HTTP::Server::RequestHandler:
 
 pragma[nomagic]
 private predicate isRoute(
-  ActionDispatch::Route route, string name, ActionControllerControllerClass controllerClass
+  ActionDispatch::Routing::Route route, string name, ActionControllerControllerClass controllerClass
 ) {
   route.getController() + "_controller" =
-    ActionDispatch::underscore(namespaceDeclaration(controllerClass)) and
+    ActionDispatch::Routing::underscore(namespaceDeclaration(controllerClass)) and
   name = route.getAction()
 }
 
@@ -126,7 +126,7 @@ abstract class ParamsCall extends MethodCall {
  * A `RemoteFlowSource::Range` to represent accessing the
  * ActionController parameters available via the `params` method.
  */
-class ParamsSource extends HTTP::Server::RequestInputAccess::Range {
+class ParamsSource extends Http::Server::RequestInputAccess::Range {
   ParamsSource() { this.asExpr().getExpr() instanceof ParamsCall }
 
   override string getSourceType() { result = "ActionController::Metal#params" }
@@ -143,32 +143,32 @@ abstract class CookiesCall extends MethodCall {
  * A `RemoteFlowSource::Range` to represent accessing the
  * ActionController parameters available via the `cookies` method.
  */
-class CookiesSource extends HTTP::Server::RequestInputAccess::Range {
+class CookiesSource extends Http::Server::RequestInputAccess::Range {
   CookiesSource() { this.asExpr().getExpr() instanceof CookiesCall }
 
   override string getSourceType() { result = "ActionController::Metal#cookies" }
 }
 
-// A call to `cookies` from within a controller.
+/** A call to `cookies` from within a controller. */
 private class ActionControllerCookiesCall extends ActionControllerContextCall, CookiesCall { }
 
-// A call to `params` from within a controller.
+/** A call to `params` from within a controller. */
 private class ActionControllerParamsCall extends ActionControllerContextCall, ParamsCall { }
 
-// A call to `render` from within a controller.
+/** A call to `render` from within a controller. */
 private class ActionControllerRenderCall extends ActionControllerContextCall, RenderCall { }
 
-// A call to `render_to` from within a controller.
+/** A call to `render_to` from within a controller. */
 private class ActionControllerRenderToCall extends ActionControllerContextCall, RenderToCall { }
 
-// A call to `html_safe` from within a controller.
+/** A call to `html_safe` from within a controller. */
 private class ActionControllerHtmlSafeCall extends HtmlSafeCall {
   ActionControllerHtmlSafeCall() {
     this.getEnclosingModule() instanceof ActionControllerControllerClass
   }
 }
 
-// A call to `html_escape` from within a controller.
+/** A call to `html_escape` from within a controller. */
 private class ActionControllerHtmlEscapeCall extends HtmlEscapeCall {
   ActionControllerHtmlEscapeCall() {
     this.getEnclosingModule() instanceof ActionControllerControllerClass
@@ -211,7 +211,7 @@ class RedirectToCall extends ActionControllerContextCall {
 /**
  * A call to the `redirect_to` method, as an `HttpRedirectResponse`.
  */
-class ActionControllerRedirectResponse extends HTTP::Server::HttpRedirectResponse::Range {
+class ActionControllerRedirectResponse extends Http::Server::HttpRedirectResponse::Range {
   RedirectToCall redirectToCall;
 
   ActionControllerRedirectResponse() { this.asExpr().getExpr() = redirectToCall }
@@ -323,7 +323,7 @@ predicate controllerTemplateFile(ActionControllerControllerClass cls, ErbFile te
  * `skip_before_action :verify_authenticity_token` to disable CSRF authenticity
  * token protection.
  */
-class ActionControllerSkipForgeryProtectionCall extends CSRFProtectionSetting::Range {
+class ActionControllerSkipForgeryProtectionCall extends CsrfProtectionSetting::Range {
   ActionControllerSkipForgeryProtectionCall() {
     exists(MethodCall call | call = this.asExpr().getExpr() |
       call.getMethodName() = "skip_forgery_protection"
@@ -339,7 +339,7 @@ class ActionControllerSkipForgeryProtectionCall extends CSRFProtectionSetting::R
 /**
  * A call to `protect_from_forgery`.
  */
-private class ActionControllerProtectFromForgeryCall extends CSRFProtectionSetting::Range {
+private class ActionControllerProtectFromForgeryCall extends CsrfProtectionSetting::Range {
   private ActionControllerContextCall callExpr;
 
   ActionControllerProtectFromForgeryCall() {
